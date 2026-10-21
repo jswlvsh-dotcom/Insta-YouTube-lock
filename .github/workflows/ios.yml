@@ -1,0 +1,66 @@
+name: iOS
+
+on:
+  push:
+    paths:
+      - "ios/**"
+      - ".github/workflows/ios.yml"
+  pull_request:
+    paths:
+      - "ios/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Compile (unsigned)
+    runs-on: macos-15
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Xcode version
+        run: xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build app and all extensions
+        run: |
+          xcodebuild \
+            -project GoWork.xcodeproj \
+            -scheme GoWork \
+            -configuration Debug \
+            -destination "generic/platform=iOS" \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            build > xcodebuild.log 2>&1 || {
+              echo "::group::Errors"
+              grep -E "error:" -A4 xcodebuild.log | head -300
+              echo "::endgroup::"
+              tail -60 xcodebuild.log
+              exit 1
+            }
+          echo "::group::Warnings"
+          grep -E "warning:" xcodebuild.log | sort -u | head -150 || true
+          echo "::endgroup::"
+          tail -5 xcodebuild.log
+
+      - name: Check extensions are embedded
+        run: |
+          APP=build/Build/Products/Debug-iphoneos/GoWork.app
+          ls -la "$APP" "$APP/PlugIns" || true
+          ls -la "$APP/Extensions" || true
+          test -d "$APP/PlugIns/GoWorkMonitor.appex"
+          test -d "$APP/PlugIns/GoWorkShieldConfig.appex"
+          test -d "$APP/PlugIns/GoWorkShieldAction.appex"
+          test -d "$APP/Extensions/GoWorkReport.appex"
+          /usr/libexec/PlistBuddy -c "Print" "$APP/Extensions/GoWorkReport.appex/Info.plist"

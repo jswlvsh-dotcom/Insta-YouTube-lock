@@ -1,0 +1,12 @@
+// ─────────────────────────────────────────────────────────────────────────────
+//  GoWork signing — the ONLY file you need to edit before building.
+//
+//  1. DEVELOPMENT_TEAM: your Apple Developer Team ID
+//     (Xcode → Settings → Accounts → your team, or developer.apple.com → Membership).
+//  2. GOWORK_BUNDLE_ID: any unique reverse-domain id, e.g. com.yourname.gowork
+//     The extensions and the App Group are derived from it automatically.
+// ─────────────────────────────────────────────────────────────────────────────
+
+DEVELOPMENT_TEAM =
+GOWORK_BUNDLE_ID = com.jaivish.gowork
+GOWORK_APP_GROUP = group.$(GOWORK_BUNDLE_ID)

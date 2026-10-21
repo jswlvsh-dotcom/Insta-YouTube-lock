@@ -1,0 +1,164 @@
+name: GoWork
+
+configFiles:
+  Debug: Config/Signing.xcconfig
+  Release: Config/Signing.xcconfig
+
+options:
+  bundleIdPrefix: com.jaivish
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Automatic
+    TARGETED_DEVICE_FAMILY: "1"
+    IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+
+targets:
+  GoWork:
+    type: application
+    platform: iOS
+    sources:
+      - path: GoWork
+      - path: Shared
+      - path: ReportShared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: "$(GOWORK_BUNDLE_ID)"
+        PRODUCT_NAME: GoWork
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    info:
+      path: GoWork/Info.plist
+      properties:
+        CFBundleDisplayName: GoWork
+        UILaunchScreen:
+          UIColorName: LaunchBackground
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIUserInterfaceStyle: Dark
+        ITSAppUsesNonExemptEncryption: false
+        GoWorkAppGroup: "$(GOWORK_APP_GROUP)"
+    entitlements:
+      path: GoWork/GoWork.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - "$(GOWORK_APP_GROUP)"
+    dependencies:
+      - target: GoWorkMonitor
+      - target: GoWorkShieldConfig
+      - target: GoWorkShieldAction
+      - target: GoWorkReport
+
+  GoWorkMonitor:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: GoWorkMonitor
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: "$(GOWORK_BUNDLE_ID).monitor"
+    info:
+      path: GoWorkMonitor/Info.plist
+      properties:
+        CFBundleDisplayName: GoWork Monitor
+        GoWorkAppGroup: "$(GOWORK_APP_GROUP)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.deviceactivity.monitor-extension
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).MonitorExtension"
+    entitlements:
+      path: GoWorkMonitor/GoWorkMonitor.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - "$(GOWORK_APP_GROUP)"
+
+  GoWorkShieldConfig:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: GoWorkShieldConfig
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: "$(GOWORK_BUNDLE_ID).shield-config"
+    info:
+      path: GoWorkShieldConfig/Info.plist
+      properties:
+        CFBundleDisplayName: GoWork Shield
+        GoWorkAppGroup: "$(GOWORK_APP_GROUP)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.ManagedSettingsUI.shield-configuration-service
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).ShieldConfigurationExtension"
+    entitlements:
+      path: GoWorkShieldConfig/GoWorkShieldConfig.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - "$(GOWORK_APP_GROUP)"
+
+  GoWorkShieldAction:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: GoWorkShieldAction
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: "$(GOWORK_BUNDLE_ID).shield-action"
+    info:
+      path: GoWorkShieldAction/Info.plist
+      properties:
+        CFBundleDisplayName: GoWork Shield Action
+        GoWorkAppGroup: "$(GOWORK_APP_GROUP)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.ManagedSettings.shield-action-service
+          NSExtensionPrincipalClass: "$(PRODUCT_MODULE_NAME).ShieldActionExtension"
+    entitlements:
+      path: GoWorkShieldAction/GoWorkShieldAction.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - "$(GOWORK_APP_GROUP)"
+
+  # Screen Time report (ExtensionKit): ends up in GoWork.app/Extensions, not PlugIns.
+  GoWorkReport:
+    type: extensionkit-extension
+    platform: iOS
+    sources:
+      - path: GoWorkReport
+      - path: Shared
+      - path: ReportShared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: "$(GOWORK_BUNDLE_ID).report"
+    info:
+      path: GoWorkReport/Info.plist
+      properties:
+        CFBundleDisplayName: GoWork Report
+        GoWorkAppGroup: "$(GOWORK_APP_GROUP)"
+        EXAppExtensionAttributes:
+          EXExtensionPointIdentifier: com.apple.deviceactivityui.report-extension
+    entitlements:
+      path: GoWorkReport/GoWorkReport.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups:
+          - "$(GOWORK_APP_GROUP)"
+
+schemes:
+  GoWork:
+    build:
+      targets:
+        GoWork: all
+    run:
+      config: Debug
+    archive:
+      config: Release

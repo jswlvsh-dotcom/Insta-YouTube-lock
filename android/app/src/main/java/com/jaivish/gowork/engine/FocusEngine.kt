@@ -163,10 +163,10 @@ class FocusEngine(
             publish(settings())
             return
         }
-        if (request.kind == LockKind.OPEN_PAUSE || request.kind == LockKind.NUDGE) {
-            pending = null
-            usageSinceNudgeMs = 0L
-        }
+        if (request.kind == LockKind.NUDGE) usageSinceNudgeMs = 0L
+        // A reminder stays pending: coming straight back shows it again (with its countdown),
+        // so "I'm going to work" can't be used as a shortcut around "Continue".
+        // A break of SESSION_BREAK_MS clears it.
         stats.update(today(now), request.packageName) { it.copy(listened = it.listened + 1) }
         leaveApp(request.packageName, now)
     }

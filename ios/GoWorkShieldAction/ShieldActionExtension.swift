@@ -34,13 +34,10 @@ final class ShieldActionExtension: ShieldActionDelegate {
             StatsStore.update { $0.wentToWork += 1 }
             ShieldState.continueRequestedAt = nil
             ShieldState.emergencyRequestedAt = nil
-            if !reason.isHard {
-                if settings.mindfulOpen {
-                    // Stay shielded: the next open asks "why are you here?" first.
-                    ShieldState.nudgeReason = .open
-                } else {
-                    Shields.clear(.nudge)
-                }
+            if !reason.isHard, settings.mindfulOpen {
+                // The shield stays, so coming straight back still needs the two-tap "Continue";
+                // the next open asks "why are you here?" instead of repeating the reminder.
+                ShieldState.nudgeReason = .open
             }
             return .close
 

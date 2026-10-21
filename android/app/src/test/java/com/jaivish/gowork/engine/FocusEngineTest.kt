@@ -115,6 +115,25 @@ class FocusEngineTest {
     }
 
     @Test
+    fun comingStraightBackAfterGoingToWorkShowsTheReminderAgain() {
+        open(INSTAGRAM)
+        advance(120)
+        engine.onPrimary(host.current!!.id)
+        assertNull(host.current)
+
+        now += 30_000
+        engine.onForegroundChanged(INSTAGRAM)
+        assertEquals(LockKind.NUDGE, host.current?.kind)
+
+        engine.onPrimary(host.current!!.id)
+        engine.onForegroundChanged("com.android.launcher")
+        now += FocusEngine.SESSION_BREAK_MS
+        engine.tick()
+        engine.onForegroundChanged(INSTAGRAM)
+        assertNull("a real break clears the reminder", host.current)
+    }
+
+    @Test
     fun switchingAwayDoesNotEscapeAPendingReminder() {
         open(INSTAGRAM)
         advance(120)

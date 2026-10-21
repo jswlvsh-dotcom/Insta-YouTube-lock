@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GoWork</string>
+    <string name="accessibility_label">GoWork Focus Guard</string>
+    <string name="accessibility_description">GoWork uses Accessibility only to see which app is open on screen (for example Instagram or YouTube) and whether a Reels or Shorts screen is showing. That lets it count your time, show the \"Go do your work\" reminder every few minutes, and lock apps when you hit your limit. GoWork does not read your messages, does not record your screen and keeps all data on this phone.</string>
+    <string name="channel_guard">Focus guard status</string>
+    <string name="channel_guard_desc">Shows that GoWork is watching your apps and how much time you spent today.</string>
+</resources>

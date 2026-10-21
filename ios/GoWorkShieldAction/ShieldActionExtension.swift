@@ -25,6 +25,8 @@ final class ShieldActionExtension: ShieldActionDelegate {
     private func respond(to action: ShieldAction) -> ShieldActionResponse {
         let settings = GoSettings.load()
         let now = Date()
+        // Drop locks whose time is over even if iOS hasn't delivered the "interval ended" callback yet.
+        Shields.refreshHardShields(settings: settings, now: now)
         let reason = ShieldState.current(settings: settings, now: now)
 
         switch action {

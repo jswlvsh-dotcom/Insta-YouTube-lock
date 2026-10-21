@@ -15,14 +15,26 @@ permissions:
 
 jobs:
   build:
-    name: Compile (unsigned)
+    name: Compile (unsigned, ${{ matrix.xcode }} Xcode)
     runs-on: macos-15
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        xcode: [default, newest]
     defaults:
       run:
         working-directory: ios
     steps:
       - uses: actions/checkout@v5
+
+      - name: Select Xcode
+        if: matrix.xcode == 'newest'
+        run: |
+          ls -d /Applications/Xcode*.app || true
+          NEWEST=$(ls -d /Applications/Xcode_*.app | grep -v -i beta | sort -V | tail -1)
+          echo "Using $NEWEST"
+          sudo xcode-select -s "$NEWEST"
 
       - name: Xcode version
         run: xcodebuild -version

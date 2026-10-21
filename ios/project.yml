@@ -42,6 +42,7 @@ targets:
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         UIUserInterfaceStyle: Dark
+        UIRequiresFullScreen: true
         ITSAppUsesNonExemptEncryption: false
         GoWorkAppGroup: "$(GOWORK_APP_GROUP)"
     entitlements:

@@ -33,10 +33,16 @@ GoWork runs in the background on your phone, watches how long you spend on
 
 ## 📱 Android — install the APK
 
-1. Open the repository on GitHub → **Actions** → **Android** → newest green run →
-   **Artifacts** → download **GoWork-android** (a zip with `GoWork-<n>.apk` inside).
-2. Unzip and open the APK on your phone. Allow *"Install unknown apps"* when Android asks.
-3. Open **GoWork** and follow the setup. It asks for four things:
+**Get the APK** (either way):
+
+- **Direct link** — once a release has been published (Actions → *Android* → *Run workflow* →
+  tick *"Also publish the APK…"*), open this on your phone:
+  `https://github.com/jswlvsh-dotcom/Insta-YouTube-lock/releases/download/android-latest/GoWork.apk`
+- **From GitHub Actions** — repository → **Actions** → **Android** → newest green run →
+  **Artifacts** → **GoWork-android** (a zip with `GoWork-<n>.apk` inside; you need to be logged in).
+
+Then open the APK on the phone, allow *"Install unknown apps"*, open **GoWork** and follow the
+setup. It asks for four things:
 
 | Permission | Why | Where |
 |---|---|---|
@@ -53,8 +59,17 @@ GoWork runs in the background on your phone, watches how long you spend on
 > lock it in the recent-apps screen. **Samsung:** Settings → Battery → Background usage limits →
 > add GoWork to *Never auto sleeping apps*.
 
-The release APK from CI is signed with a temporary debug key, so to update later you may need
-to uninstall the old version first (your stats reset). See *Signing* below for a permanent key.
+**Updates:** without your own signing key every CI build gets a new temporary key, so you
+must uninstall the old GoWork before installing a newer APK. To update in place instead, create a
+key once and add it as repository secrets (Settings → Secrets and variables → Actions):
+
+```bash
+keytool -genkeypair -v -keystore gowork.jks -alias gowork -keyalg RSA -keysize 2048 -validity 10000
+base64 -w0 gowork.jks   # paste the output into the secret GOWORK_KEYSTORE_BASE64
+```
+
+Also add `GOWORK_KEYSTORE_PASSWORD`, `GOWORK_KEY_ALIAS` (`gowork`) and `GOWORK_KEY_PASSWORD`.
+Keep `gowork.jks` private and never commit it.
 
 ### Build it yourself (Android)
 
@@ -66,7 +81,7 @@ cd android
 ./gradlew assembleRelease     # → app/build/outputs/apk/release/app-release.apk
 ```
 
-**Signing:** set `GOWORK_KEYSTORE_FILE`, `GOWORK_KEYSTORE_PASSWORD`, `GOWORK_KEY_ALIAS` and
+**Signing locally:** set `GOWORK_KEYSTORE_FILE`, `GOWORK_KEYSTORE_PASSWORD`, `GOWORK_KEY_ALIAS` and
 `GOWORK_KEY_PASSWORD` to sign release builds with your own key (otherwise the debug key is used).
 
 ---

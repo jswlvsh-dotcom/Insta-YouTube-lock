@@ -27,9 +27,12 @@
         <package android:name="com.google.android.youtube" />
     </queries>
 
+    <!-- enableOnBackInvokedCallback=false keeps the classic Back key event, which the
+         lock overlay (a window without an Activity) listens for. -->
     <application
         android:name=".GoWorkApp"
         android:allowBackup="false"
+        android:enableOnBackInvokedCallback="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"

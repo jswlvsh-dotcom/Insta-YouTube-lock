@@ -134,7 +134,8 @@ ios/       SwiftUI + Screen Time API (generated with XcodeGen from project.yml)
 ```
 
 **Reminder logic (both platforms):** time on all watched apps is added together. Every
-*N* minutes (default 2) the lock appears. "I'm going to work" sends you home; "Continue"
+*N* minutes (default 2) the lock appears. "I'm going to work" sends you home, and coming straight
+back shows the lock again, so the only way to keep scrolling is the deliberate "Continue", which
 gives you another *N* minutes. On Android a break of 3+ minutes starts a fresh session (with the
 mindful pause on the next open); on iOS the reminders are counted per day.
 

@@ -6,15 +6,18 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.AudioManager
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
+import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
+import com.jaivish.gowork.core.KnownApps
 import com.jaivish.gowork.data.Graph
 import com.jaivish.gowork.engine.EngineHost
 import com.jaivish.gowork.engine.FocusEngine
@@ -140,7 +143,10 @@ class GuardAccessibilityService : AccessibilityService(), EngineHost, LockAction
         audioFocus?.release()
     }
 
-    override fun goHome() {
+    override fun goHome(fromPkg: String) {
+        // YouTube keeps playing in picture-in-picture (or in the background with Premium)
+        // after Home, so pause it first. Not done for other apps so background music survives.
+        if (fromPkg in VIDEO_APPS) pauseMedia()
         performGlobalAction(GLOBAL_ACTION_HOME)
     }
 
@@ -178,14 +184,43 @@ class GuardAccessibilityService : AccessibilityService(), EngineHost, LockAction
         if (tickCount % IGNORED_REFRESH_EVERY_TICKS == 0L) refreshIgnoredPackages()
     }
 
-    /** Window events can be missed (screen unlock, floating windows); ask the system directly. */
+    /**
+     * Window events can be missed (screen unlock, floating windows), so ask the system directly.
+     * A watched app playing in picture-in-picture counts as being used, so a floating YouTube
+     * video can't run past the reminders.
+     */
     private fun verifyForeground() {
-        val pkg = try {
+        val active = try {
             rootInActiveWindow?.packageName?.toString()
         } catch (e: Exception) {
             null
+        }?.takeIf { it !in ignoredPackages }
+        val settings = Graph.settings.current
+        val pkg = if (active != null && settings.isTracked(active)) {
+            active
+        } else {
+            pictureInPicturePackage()?.takeIf { settings.isTracked(it) && isAudioPlaying() } ?: active
         } ?: return
-        if (pkg !in ignoredPackages) engine?.onForegroundChanged(pkg)
+        engine?.onForegroundChanged(pkg)
+    }
+
+    private fun pictureInPicturePackage(): String? = try {
+        windows.firstOrNull { it.isInPictureInPictureMode }?.root?.packageName?.toString()
+    } catch (e: Exception) {
+        null
+    }
+
+    private fun isAudioPlaying(): Boolean = getSystemService(AudioManager::class.java)?.isMusicActive == true
+
+    private fun pauseMedia() {
+        val audio = getSystemService(AudioManager::class.java) ?: return
+        val now = SystemClock.uptimeMillis()
+        try {
+            audio.dispatchMediaKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE, 0))
+            audio.dispatchMediaKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PAUSE, 0))
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not pause media", e)
+        }
     }
 
     private fun requestShortFormScan(pkg: String, urgent: Boolean) {
@@ -303,5 +338,11 @@ class GuardAccessibilityService : AccessibilityService(), EngineHost, LockAction
         const val URGENT_SCAN_DELAY_MS = 250L
         const val SCAN_INTERVAL_MS = 700L
         const val BACK_DELAY_MS = 200L
+
+        val VIDEO_APPS = setOf(
+            KnownApps.YOUTUBE,
+            "app.revanced.android.youtube",
+            "com.google.android.apps.youtube.music",
+        )
     }
 }

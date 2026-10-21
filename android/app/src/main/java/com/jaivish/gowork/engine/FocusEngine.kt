@@ -14,7 +14,8 @@ interface EngineHost {
     /** Show or update the lock. [fresh] is true when a lock appears or changes kind. */
     fun showLock(request: LockRequest, fresh: Boolean)
     fun hideLock()
-    fun goHome()
+    /** Leave [fromPkg] for the home screen (pausing its video first if needed). */
+    fun goHome(fromPkg: String)
     fun goBack()
     fun labelFor(pkg: String): String
 }
@@ -205,11 +206,12 @@ class FocusEngine(
     // --------------------------------------------------------------- internals
 
     private fun leaveApp(pkg: String, now: Long) {
+        // Go home while the lock still holds audio focus, so the video can't resume first.
+        host.goHome(pkg)
         hide()
         markLeft(pkg, now)
         foreground = null
         shortFormPkg = null
-        host.goHome()
         publish(settings())
     }
 

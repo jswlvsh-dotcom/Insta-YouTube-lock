@@ -26,6 +26,7 @@ GoWork runs in the background on your phone, watches how long you spend on
 | Real screen time: today, per app, last 7 days | ✅ | ✅ |
 | Spoken reminder ("Jaivish, go do your work.") | ✅ optional | – (notification instead) |
 | Pauses the video behind the lock | ✅ | – |
+| Catches YouTube picture-in-picture / background play | ✅ | – |
 | Runs in background, survives reboot | ✅ | ✅ (handled by iOS) |
 
 ---

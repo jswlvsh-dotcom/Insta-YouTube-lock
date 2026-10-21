@@ -43,7 +43,7 @@ class FocusEngineTest {
             current = null
         }
 
-        override fun goHome() {
+        override fun goHome(fromPkg: String) {
             homeCount++
         }
 
